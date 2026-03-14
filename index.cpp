@@ -103,27 +103,26 @@ int clientMenu(vector <string>& card, vector<string>& cardNumbers, vector<string
         // Now show the ATM menu for this card
         int choice;
 
+        string pin;
+        cout << "Enter PIN: ";
+        cin >> pin;
+        if(pin != encodedPINs[index]){ // check for invalid input
+            cout << "Invalid pin"; 
+            cout << "Press any key to continue";
+            cin >> contin;
+            continue;
+        }
+
         do{
             clearScreen();
             choice =  displayMenu();
 
             if(choice == 1){              //Checks balance
-                string pin;
-                cout << "Enter PIN: ";
-                cin >> pin;
-                if(pin != encodedPINs[index]){ // check for invalid input
-                    cout << "Invalid pin"; 
-                    cout << "Press any key to continue";
-                    cin >> contin;
-                    continue;
-                }
-                else{
-                    cout << "\n------------------------------------\n";
-                    cout << "Current Balance: " << balances[index] << endl;
-                    cout << "\n------------------------------------\n";
-                    cout << "Press any key to continue: "; 
-                    cin >> contin;
-                }
+                cout << "\n------------------------------------\n";
+                cout << "Current Balance: " << balances[index] << endl;
+                cout << "\n------------------------------------\n";
+                cout << "Press any key to continue: "; 
+                cin >> contin;
             }
             else if(choice == 2){ // widthraw money
                 int amount;
@@ -151,70 +150,61 @@ int clientMenu(vector <string>& card, vector<string>& cardNumbers, vector<string
                 }
 
                 amount = widthraw[selection - 1];
-            
-                string pin;
-                cout << "Enter PIN: ";
-                cin >> pin;
-                if(pin != encodedPINs[index]){
-                    cout << "Invalid pin";
-                    cout << "Press any key to continue";
-                    cin >> contin;
-                    continue;
+        
+
+                calculateBills(amount,bills1000, bills500);
+
+                // Check if ATM has enough bills
+                if (bills1000 > billCount[1] || bills500 > billCount[0]) {
+                    cout << "ATM does not have enough bills for this amount.\n";
+                } 
+                else {
+                    string accountType = accountTypes[index]; 
+                    int bankIDX; 
+                    double fee;
+
+                    for(int i = 0; i < 4; i++){
+                        if(bankNames[i] == userBanks[index]){
+                            bankIDX = i;
+                            break;
+                        }
                     }
-                else{
 
-                    calculateBills(amount,bills1000, bills500);
-
-                    // Check if ATM has enough bills
-                    if (bills1000 > billCount[1] || bills500 > billCount[0]) {
-                        cout << "ATM does not have enough bills for this amount.\n";
-                    } 
-                    else {
-                        string accountType = accountTypes[index]; 
-                        int bankIDX; 
-                        double fee;
-
-                        for(int i = 0; i < 4; i++){
-                            if(bankNames[i] == userBanks[index]){
-                                bankIDX = i;
-                                break;
-                            }
-                        }
-
-                        if(accountType == "Local"){ // checks if account is local or international
-                            fee = localFees[bankIDX];
-                        } else {
-                            fee = intlFees[bankIDX];
-                        }
+                    if(accountType == "Local"){ // checks if account is local or international
+                        fee = localFees[bankIDX];
+                    } else {
+                        fee = intlFees[bankIDX];
+                    }
 
 
-                        double totalDispensed = bills1000 * 1000 + bills500 * 500;
+                    double totalDispensed = bills1000 * 1000 + bills500 * 500;
 
-                        if(totalDispensed + fee > balances[index]){
-                            cout << "Insufficient balance to cover withdrawal service fee.\n";
-                        }
-                        else{
-                            // Dispense the money
-                            billCount[1] -= bills1000; // minus 1000 bills
-                            billCount[0] -= bills500;  // minus 500 bills
+                    if(totalDispensed + fee > balances[index]){
+                        cout << "Insufficient balance to cover withdrawal service fee.\n";
+                        cout << "Press any key to continue: "; 
+                        cin >> contin;
+                    }
+                    else{
+                   // Dispense the money
+                        billCount[1] -= bills1000; // minus 1000 bills
+                        billCount[0] -= bills500;  // minus 500 bills
 
+                        cout << "\n=========== CASH DISPENSED ==========\n";
+                        cout << "Dispensed:\n";
+                        cout << bills1000 << " x 1000\n";
+                        cout << bills500 << " x 500\n";
+                        cout << "------------------------------------\n";
 
-                            cout << "\n=========== CASH DISPENSED ==========\n";
-                            cout << "Dispensed:\n";
-                            cout << bills1000 << " x 1000\n";
-                            cout << bills500 << " x 500\n";
-                            cout << "------------------------------------\n";
+                        cout << "Service Fee: PHP " << fee << endl;
+                        cout << "Total dispensed: PHP " << totalDispensed << "\n";
 
-                            cout << "Service Fee: PHP " << fee << endl;
-                            cout << "Total dispensed: PHP " << totalDispensed << "\n";
-
-                            balances[index] = balances[index] - totalDispensed;
-                            balances[index] = balances[index] - fee;
-                            cout << "Press any key to continue: "; 
-                            cin >> contin;
-                        }
-                    }      
-                }
+                        balances[index] = balances[index] - totalDispensed;
+                        balances[index] = balances[index] - fee;
+                        cout << "Press any key to continue: "; 
+                        cin >> contin;
+                    }
+                }      
+                
             }
             else if(choice == 3){ // transfer fund
                 string numofRecepient;
