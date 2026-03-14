@@ -44,6 +44,18 @@ void deductBalance(double& balance, double amount){
     deductBalance(balance, 0); 
 }
 
+// Recursive function to deduct from daily limit
+void deductDailyLimit(double& dailyLimit, double amount) {
+    if (amount <= 0) {
+        return; // base case
+    }
+
+    double chunk = (amount > 1000) ? 1000 : amount; 
+    dailyLimit -= chunk;
+
+    deductDailyLimit(dailyLimit, amount - chunk);
+}
+
 
 
 int login(){
@@ -94,10 +106,8 @@ int displayMenu(){;
 
 int clientMenu(vector <string>& card, vector<string>& cardNumbers, vector<string>& encodedPINs, 
     vector<double>& balances, vector<string>& userBanks, int billCount[], double localFees[], string bankNames[],  
-    vector<string>& accountTypes,  double intlFees[]){
+    vector<string>& accountTypes,  double intlFees[], double dailyLimits[]){
     string contin; // variable for UI to continue
-
-
 
     while(true) { // loop for inserting card 
         clearScreen();
@@ -125,6 +135,7 @@ int clientMenu(vector <string>& card, vector<string>& cardNumbers, vector<string
 
         // Now show the ATM menu for this card
         int choice;
+        int bankIDX; 
 
         string pin;
         cout << "Enter PIN: ";
@@ -177,13 +188,16 @@ int clientMenu(vector <string>& card, vector<string>& cardNumbers, vector<string
 
                 calculateBills(amount,bills1000, bills500);
 
+
                 // Check if ATM has enough bills
                 if (bills1000 > billCount[1] || bills500 > billCount[0]) {
                     cout << "ATM does not have enough bills for this amount.\n";
+                    cout << "Press any key to continue: ";
+                    cin >> contin;
+                    continue;
                 } 
                 else {
                     string accountType = accountTypes[index]; 
-                    int bankIDX; 
                     double fee;
 
                     for(int i = 0; i < 4; i++){
@@ -193,11 +207,23 @@ int clientMenu(vector <string>& card, vector<string>& cardNumbers, vector<string
                         }
                     }
 
+                    //checks if daily limit for bank has been reached 
+                    deductDailyLimit(dailyLimits[bankIDX], amount);
+                    if(dailyLimits[bankIDX] <= 0){
+                        cout << "Daily limit of widthraw for bank has reached can no longer widthraw. \n";
+                        cout << "Press any key to continue: ";
+                        cin >> contin;
+                        continue;
+                    }
+
                     if(accountType == "Local"){ // checks if account is local or international
                         fee = localFees[bankIDX];
                     } else {
                         fee = intlFees[bankIDX];
                     }
+
+
+                    
 
 
                     fee = calculateFee(1, fee); 
@@ -207,6 +233,7 @@ int clientMenu(vector <string>& card, vector<string>& cardNumbers, vector<string
                         cout << "Insufficient balance to cover withdrawal service fee.\n";
                         cout << "Press any key to continue: "; 
                         cin >> contin;
+                        continue;
                     }
                     else{
                     
@@ -344,7 +371,7 @@ int main(){
     // Encoded passwords
 
 
-    vector<double> balances = {10000, 5000};        
+    vector<double> balances = {70000, 85000};        
     // Account balances
 
 
@@ -358,7 +385,7 @@ int main(){
     while(true) {
         int role = login();
         if(role == 1) {
-            clientMenu(card, cardNumbers, encodedPINs, balances, userBanks, billCount, localFees, bankNames, accountTypes, intlFees);
+            clientMenu(card, cardNumbers, encodedPINs, balances, userBanks, billCount, localFees, bankNames, accountTypes, intlFees, dailyLimits);
         } 
         else if(role == 0) {
             cout << "Exiting ATM...\n";
