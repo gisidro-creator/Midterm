@@ -23,6 +23,29 @@ void calculateBills(double amount,int& bills1000, int& bills500) {
     // Base case: amount < 500, recursion stops automatically
 }
 
+//Recursive fucntion that calculate the fees
+double calculateFee(int transactions, double bankFee){
+    if(transactions == 0){
+        return 0; // base case
+    }
+
+    return bankFee + calculateFee(transactions - 1, bankFee);
+}
+
+
+
+// reccursion for calculating tranfer funds
+void deductBalance(double& balance, double amount){
+    if(amount <= 0){
+        return; // base case
+    }
+
+    balance -= amount;     // subtract once
+    deductBalance(balance, 0); 
+}
+
+
+
 int login(){
 
     cout << "====================================\n";
@@ -177,6 +200,7 @@ int clientMenu(vector <string>& card, vector<string>& cardNumbers, vector<string
                     }
 
 
+                    fee = calculateFee(1, fee); 
                     double totalDispensed = bills1000 * 1000 + bills500 * 500;
 
                     if(totalDispensed + fee > balances[index]){
@@ -185,6 +209,9 @@ int clientMenu(vector <string>& card, vector<string>& cardNumbers, vector<string
                         cin >> contin;
                     }
                     else{
+                    
+
+
                    // Dispense the money
                         billCount[1] -= bills1000; // minus 1000 bills
                         billCount[0] -= bills500;  // minus 500 bills
@@ -198,8 +225,14 @@ int clientMenu(vector <string>& card, vector<string>& cardNumbers, vector<string
                         cout << "Service Fee: PHP " << fee << endl;
                         cout << "Total dispensed: PHP " << totalDispensed << "\n";
 
-                        balances[index] = balances[index] - totalDispensed;
-                        balances[index] = balances[index] - fee;
+
+
+                        
+                        deductBalance(balances[index], totalDispensed);
+                        deductBalance(balances[index], fee);
+
+
+
                         cout << "Press any key to continue: "; 
                         cin >> contin;
                     }
@@ -243,6 +276,7 @@ int clientMenu(vector <string>& card, vector<string>& cardNumbers, vector<string
                     break;
                     }
                 }
+
                 if(accountType == "Local"){ // checks if account is local or international
                     fee = localFees[senderIndex];
                 }
@@ -250,22 +284,28 @@ int clientMenu(vector <string>& card, vector<string>& cardNumbers, vector<string
                     fee = intlFees[senderIndex];
                 }
 
-                if(balances[senderIndex] < transferAmount + fee){
+                if(balances[index] < transferAmount + fee){
                     cout << "Insufficient balance.\n";
                     cout << "Press any key to continue";
                     cin >> contin;
                     continue;
                 }
 
-                balances[senderIndex] -= (transferAmount + fee);
-                balances[receptantIndex] += transferAmount;
+            
+                // Deduct transfer amount 
+                deductBalance(balances[index], transferAmount);
 
+                // 3Deduct fee
+                deductBalance(balances[index], fee);
+
+                // Add money to recipient
+                balances[receptantIndex] += transferAmount;
 
                 cout << "=============================== \n";
                 cout << "\nTransfer Successful!\n";
                 cout << "Transferred: PHP " << transferAmount << endl;
                 cout << "Transfer Fee: PHP " << fee << endl;
-                cout << "Remaining Balance: PHP " << balances[senderIndex] << endl;
+                cout << "Remaining Balance: PHP " << balances[index] << endl;
                 cout << "=============================== \n";
                 cout << "Press any key to continue: "; 
                 cin >> contin;
