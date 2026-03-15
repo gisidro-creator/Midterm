@@ -176,7 +176,9 @@ void clientMenu(vector <string>& card, vector<string>& cardNumbers, vector<strin
     vector<string>& accountTypes,  double intlFees[], double dailyLimits[], vector<string>& transactionTypes  ,vector<double>& transactionAmounts, vector<double>& transactionFees,
     vector<int>& transactionQuantities,  vector <string>& time, vector <int>& owner){
 
-
+    int choice = 0;   
+    int index = 0;    
+    int bankIDX = 0;  
     string contin; // variable for UI to continue
 
     while(true) { // loop for inserting card 
@@ -495,7 +497,6 @@ void clientMenu(vector <string>& card, vector<string>& cardNumbers, vector<strin
             }                
         }while(choice != 6);
     }  
-};
 
 
 void adminMenu(vector<string>& cardNumbers, vector<string>& encodedPINs, 
