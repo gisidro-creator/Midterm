@@ -157,7 +157,7 @@ int displayMenu(int& index, string bankNames[], vector<string>& accountTypes){;
 
 void clientMenu(vector <string>& card, vector<string>& cardNumbers, vector<string>& encodedPINs, 
     vector<double>& balances, vector<string>& userBanks, int billCount[], double localFees[], string bankNames[],  
-    vector<string>& accountTypes,  double intlFees[], double dailyLimits[], vector<string>& transactionTypes  ,vector<double>& transactionAmounts, vector<double> transactionFees,
+    vector<string>& accountTypes,  double intlFees[], double dailyLimits[], vector<string>& transactionTypes  ,vector<double>& transactionAmounts, vector<double>& transactionFees,
     vector<int>& transactionQuantities,  vector <string>& time, vector <int>& owner){
 
 
@@ -294,14 +294,15 @@ void clientMenu(vector <string>& card, vector<string>& cardNumbers, vector<strin
                         }
                     }
 
-                    //checks if daily limit for bank has been reached 
-                    deductDailyLimit(dailyLimits[bankIDX], amount);
+
                     if(dailyLimits[bankIDX] <= 0){
                         cout << "Daily limit of widthraw for bank has reached can no longer widthraw. \n";
                         cout << "Press any key to continue: ";
                         cin >> contin;
                         continue;
                     }
+                    //checks if daily limit for bank has been reached 
+                    deductDailyLimit(dailyLimits[bankIDX], amount);
 
                     if(accountType == "Local"){ // checks if account is local or international
                         fee = localFees[bankIDX];
@@ -356,7 +357,7 @@ void clientMenu(vector <string>& card, vector<string>& cardNumbers, vector<strin
                 double  transferAmount;
                 int receptantIndex = -1;
                 int senderIndex;
-                int fee;
+                double fee;
                 string accountType = accountTypes[index]; 
 
                 cout << "Enter Account Number where to transfer fund: ";
