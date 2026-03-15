@@ -4,6 +4,22 @@
 
 using namespace std;
 
+string encodeString(string plain) {
+    string encoded = "";
+    for (char c : plain) {
+        encoded += to_string((int)c) + "-"; 
+    }
+    return encoded;
+}
+
+void updateBalance(vector<double>& balances, int index, double amount) {
+    balances[index] -= amount;
+}
+void updateBalance(vector<double>& balances, int index, string amountStr) {
+    double amount = stod(amountStr);
+    updateBalance(balances, index, amount);
+}
+
 void clearScreen() {
 #if _WIN32
     system("cls");
@@ -494,13 +510,16 @@ void adminMenu(vector<string>& cardNumbers, vector<string>& encodedPINs,
     while (attempts < 3) {
         cout << "Enter Admin Passcode: ";
         cin >> inputPass;
-        if (inputPass == adminPasscode) break;
+       if (inputPass == adminPasscode) {
+        break; // Success! Jump out of this loop and show the menu
+    }
         attempts++;
         cout << "Incorrect. Attempts left: " << 3 - attempts << endl;
         if (attempts == 3) {
             cout << "System Locked. Returning to main menu...\n";
             return;
-
+        }
+        }
    int choice;
     string contin;
     do {
@@ -574,7 +593,7 @@ int main(){
     // Parallel vectors - keep in sync!
 
 
-    vector<string> encodedPINs = {encodeString("123456"), "encodeString(654321")};     
+   vector<string> encodedPINs = {encodeString("123456"), encodeString("654321")}; 
     // Encoded passwords
 
 
