@@ -201,11 +201,12 @@ void clientMenu(vector <string>& card, vector<string>& cardNumbers, vector<strin
         string pin;
         cout << "Enter PIN: ";
         cin >> pin;
-        if(pin != encodedPINs[index]){ // check for invalid input
-            cout << "Invalid pin"; 
-            cout << "Press any key to continue";
-            cin >> contin;
-            continue;
+
+        if (encodeString(pin) != encodedPINs[index]) { 
+        cout << "Invalid PIN!\n";
+   
+        }
+
         }
         clearScreen();
 
@@ -481,11 +482,80 @@ void clientMenu(vector <string>& card, vector<string>& cardNumbers, vector<strin
 };
 
 
-void adminMenu();
+void adminMenu(vector<string>& cardNumbers, vector<string>& encodedPINs, 
+               vector<double>& balances, vector<string>& userBanks, 
+               vector<string>& accountTypes, int billCount[], string& adminPasscode) {
+        
+    clearScreen();
+    string inputPass;
+    int attempts = 0;
 
+    // Part III: Admin Authentication (Max 3 attempts)
+    while (attempts < 3) {
+        cout << "Enter Admin Passcode: ";
+        cin >> inputPass;
+        if (inputPass == adminPasscode) break;
+        attempts++;
+        cout << "Incorrect. Attempts left: " << 3 - attempts << endl;
+        if (attempts == 3) {
+            cout << "System Locked. Returning to main menu...\n";
+            return;
 
+   int choice;
+    string contin;
+    do {
+        clearScreen();
+        cout << "======= ADMIN DASHBOARD =======\n";
+        cout << "Time: " << getTime() << endl;
+        cout << "[1] Cash Management (Refill)\n";
+        cout << "[2] Create New Account\n";
+        cout << "[3] View All Accounts\n";
+        cout << "[4] Delete Account\n";
+        cout << "[5] Change Admin Passcode\n";
+        cout << "[6] Logout\n";
+        cout << "-------------------------------\nChoice: ";
+        cin >> choice;
+
+        if (choice == 1) { // Part 3: Machine Refilling with ctime
+            time_t now = time(0);
+            tm* localTime = localtime(&now);
+            // Maintenance window: 8:00 - 8:15 AM
+            if (localTime->tm_hour == 8 && localTime->tm_min <= 15) {
+                billCount[0] += 100; // Add 500s
+                billCount[1] += 100; // Add 1000s
+                cout << "Refill successful (Maintenance Window Active).\n";
+            } else {
+                cout << "REFILL DENIED: Maintenance is only 8:00 AM - 8:15 AM.\n";
+            }
+            cin.ignore(); getline(cin, contin);
+        }
+        else if (choice == 2) { // Account Creation
+            string newCard, newPin, newBank, newType;
+            cout << "Enter Card Number: "; cin >> newCard;
+            cout << "Enter PIN: "; cin >> newPin;
+            cout << "Enter Bank (BDO/BPI/etc): "; cin >> newBank;
+            cout << "Enter Type (Local/Intl): "; cin >> newType;
+    
+            cardNumbers.push_back(newCard);
+            encodedPINs.push_back(newPin); // In a real version, use your encode function here
+            balances.push_back(0.0);
+            userBanks.push_back(newBank);
+            accountTypes.push_back(newType);
+            cout << "Account created!\n";
+            cin.ignore(); getline(cin, contin);
+        }
+        else if (choice == 3) { // View All
+            for(int i=0; i < cardNumbers.size(); i++) {
+                cout << i+1 << ". Card: " << cardNumbers[i] << " | Bal: " << balances[i] << " | Bank: " << userBanks[i] << endl;
+            }
+            cout << "Press Enter to continue...";
+            cin.ignore(); getline(cin, contin);
+        }
+    } while (choice != 6);
+}
 
 int main(){
+    string adminPasscode = "6767";
     const int NUM_BANKS = 4;
     string bankNames[NUM_BANKS] = {"BDO", "BPI", "Metrobank", "Security Bank"};
     double localFees[NUM_BANKS] = {25, 20, 30, 15};
@@ -504,7 +574,7 @@ int main(){
     // Parallel vectors - keep in sync!
 
 
-    vector<string> encodedPINs = {"123456", "654321"};     
+    vector<string> encodedPINs = {encodeString("123456"), "encodeString(654321")};     
     // Encoded passwords
 
 
@@ -530,19 +600,22 @@ int main(){
 
     vector <int> owner;
 
-
-
-    while(true) {
+     while(true) {
         int role = login();
         if(role == 1) {
             clientMenu(card, cardNumbers, encodedPINs, balances, userBanks, billCount, localFees, bankNames, accountTypes, 
                 intlFees, dailyLimits, transactionTypes, transactionAmounts,  transactionFees, transactionQuantities, time, owner);
         } 
+        else if(role == 2) {
+            // Pass the vectors by reference so admin changes affect the system
+            adminMenu(cardNumbers, encodedPINs, balances, userBanks, accountTypes, billCount, adminPasscode);
+        }
         else if(role == 0) {
             cout << "Exiting ATM...\n";
-            break; // exit program
+            break; 
         }
     }
+
     
     return 0;
 }
