@@ -1,5 +1,7 @@
 #include <iostream>
 #include <vector>
+#include <ctime>
+
 using namespace std;
 
 void clearScreen() {
@@ -9,6 +11,7 @@ void clearScreen() {
     system("clear");
 #endif
 }
+
 
 // Recursive function to calculate number of bills for a given amount
 void calculateBills(double amount,int& bills1000, int& bills500) {
@@ -56,13 +59,52 @@ void deductDailyLimit(double& dailyLimit, double amount) {
     deductDailyLimit(dailyLimit, amount - chunk);
 }
 
+string getTime() { // couts time
+    time_t now = time(0);
+    tm* localtm = localtime(&now);
 
+    char buffer[80];
+    strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", localtm);
+
+    return buffer;
+}
+
+
+void transactionHistory(vector<string>& transactionTypes, vector<double>& transactionAmounts, vector<double>& transactionFees,
+     vector<int>& transactionQuantities,  vector <string>& time, vector <int>& owner, int& index, string bankNames[], vector<string>& accountTypes){
+    clearScreen();
+    string key;
+    
+    cout << "============================================== \n";
+    cout << "             Transaction History \n";
+    cout << "-----------------------------------------------\n";
+    cout << " Date & Time: " << getTime() << "\n";
+    cout << "  Bank: " << bankNames[index] << "           Type: " << accountTypes[index] << endl;
+    cout << "-----------------------------------------------\n";
+
+    for(int i = 0; i < transactionTypes.size(); i++){
+
+        if(owner[i] == index){
+            cout << "Type: " << transactionTypes[i] << endl;
+            cout << "Amount: " << transactionAmounts[i] << endl;
+            cout << "Fee: " << transactionFees[i] << endl;
+            cout << "Quantity : " << transactionQuantities[i] << endl;
+            cout << "Time: " << time[i] << endl;
+            cout << "-----------------------------------------------\n";
+        }
+    }
+
+    cout << "Press any key to continue: ";
+    cin >> key;
+}
 
 int login(){
 
     cout << "====================================\n";
     cout << "                ATM \n";
-    cout << "====================================\n\n";
+    cout << "====================================\n";
+    cout << "Date & Time: " << getTime() << "\n";
+    cout << "----------------------------------------\n";
 
     int choice;
     cout << "[1]User     " << "[2]Admin" << "  [3]Exit " << endl;
@@ -84,29 +126,41 @@ int login(){
 };
 
 
-int displayMenu(){;
+int displayMenu(int& index, string bankNames[], vector<string>& accountTypes){;
+    clearScreen();
     int choice;
 
-    cout << "====================================\n";
-    cout << "                ATM \n";
-    cout << "====================================\n\n";
-
-    cout << "=========================== \n";
-    cout << "[1] Check Balance \n";
-    cout << "[2] Widthraw Cash \n";
-    cout << "[3] Transfer funds \n";
-    cout << "[4] View transaction summary \n";
-    cout << "[5] Exit\n";
-    cout << "=========================== \n";
+    cout << "\n";
+    cout << "========================================\n";
+    cout << "              WELCOME TO ATM            \n";
+    cout << "========================================\n";
+    cout << " Date & Time: " << getTime() << "\n";
+    cout << "  Bank: " << bankNames[index] << "           Type: " << accountTypes[index] << endl;
+    cout << "----------------------------------------\n";
+    cout << "  [1] Check Balance\n";
+    cout << "  [2] Withdraw Cash\n";
+    cout << "  [3] Transfer Funds\n";
+    cout << "  [4] Transaction Summary\n";
+    cout << "  [5] Change PIN \n";
+    cout << "  [6] Exit\n";
+    cout << "----------------------------------------\n";
+    cout << "  Enter Choice: ";
+    
     cin >> choice;
+
+    cout << "========================================\n";
+
 
     return choice;
 };
 
 
-int clientMenu(vector <string>& card, vector<string>& cardNumbers, vector<string>& encodedPINs, 
+void clientMenu(vector <string>& card, vector<string>& cardNumbers, vector<string>& encodedPINs, 
     vector<double>& balances, vector<string>& userBanks, int billCount[], double localFees[], string bankNames[],  
-    vector<string>& accountTypes,  double intlFees[], double dailyLimits[]){
+    vector<string>& accountTypes,  double intlFees[], double dailyLimits[], vector<string>& transactionTypes  ,vector<double>& transactionAmounts, vector<double> transactionFees,
+    vector<int>& transactionQuantities,  vector <string>& time, vector <int>& owner){
+
+
     string contin; // variable for UI to continue
 
     while(true) { // loop for inserting card 
@@ -114,6 +168,8 @@ int clientMenu(vector <string>& card, vector<string>& cardNumbers, vector<string
         cout << "====================================\n";
         cout << "            ATM LOGIN\n";
         cout << "====================================\n\n";
+        cout << "Date & Time: " << getTime() << "\n";
+        cout << "----------------------------------------\n";
 
         cout << "Insert Card: \n";
         for(int i = 0; i < card.size(); i++){    
@@ -121,10 +177,15 @@ int clientMenu(vector <string>& card, vector<string>& cardNumbers, vector<string
         }
         cout << "[0] Exit\n";
 
+
         int enterNumber;
+        cout << "Enter Choice: ";
         cin >> enterNumber;
 
-        if(enterNumber == 0) break; // exit back to main
+        if(enterNumber == 0){
+            clearScreen();
+            return;
+        }; // exit back to main
         if(enterNumber < 1 || enterNumber > card.size()) {
             cout << "Invalid input. Press any key to continue: ";
             cin >> contin;
@@ -146,34 +207,60 @@ int clientMenu(vector <string>& card, vector<string>& cardNumbers, vector<string
             cin >> contin;
             continue;
         }
+        clearScreen();
 
         do{
-            clearScreen();
-            choice =  displayMenu();
+            choice =  displayMenu(index,bankNames ,accountTypes);
 
             if(choice == 1){              //Checks balance
-                cout << "\n------------------------------------\n";
+                clearScreen();
+                cout << "\n=========== Balance ==========\n";
+                cout << "Date & Time: " << getTime() << "\n";
+                cout << "  Bank: " << bankNames[index] << "      Type: " << accountTypes[index] << endl;
+                cout << "----------------------------------------\n";
+                cout << "------------------------------------\n";
                 cout << "Current Balance: " << balances[index] << endl;
                 cout << "\n------------------------------------\n";
+
                 cout << "Press any key to continue: "; 
                 cin >> contin;
+                clearScreen();
             }
             else if(choice == 2){ // widthraw money
+                clearScreen();
                 int amount;
                 int bills1000 = 0;
                 int bills500 = 0;
 
                 cout << "\n=========== WITHDRAW MONEY ==========\n";
+                cout << "Date & Time: " << getTime() << "\n";
+                cout << "  Bank: " << bankNames[index] << "      Type: " << accountTypes[index] << endl;
+                cout << "----------------------------------------\n";
 
 
-                cout << "\n \n Choose amount to widthraw:\n" ;
+                cout << "\n Choose amount to widthraw:\n" ;
 
-                int widthraw[] = {500, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000};
-                for(int i = 0; i < 11; i++){
-                    cout << "[" << i + 1 << "]" << widthraw[i] << endl;
+                int withdraw[] = {500, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000};
+                for(int i = 0; i < 11; i++) {
+
+                    cout << "[" << i+1 << "] "
+                        << withdraw[i];
+
+                    // spacing for alignment
+                    if(withdraw[i] < 10000)
+                        cout << "   ";
+
+                    // print 2 columns
+                    if(i % 2 == 1 || i == 10)
+                        cout << endl;
+                    else
+                        cout << "        ";
                 }
 
+                cout << "\n=====================================\n";
+
                 int selection;
+                cout << "Enter Choice: ";
                 cin >> selection;
 
                 if(selection < 1 || selection > 11){
@@ -183,7 +270,7 @@ int clientMenu(vector <string>& card, vector<string>& cardNumbers, vector<string
                     continue;
                 }
 
-                amount = widthraw[selection - 1];
+                amount = withdraw[selection - 1];
         
 
                 calculateBills(amount,bills1000, bills500);
@@ -222,10 +309,6 @@ int clientMenu(vector <string>& card, vector<string>& cardNumbers, vector<string
                         fee = intlFees[bankIDX];
                     }
 
-
-                    
-
-
                     fee = calculateFee(1, fee); 
                     double totalDispensed = bills1000 * 1000 + bills500 * 500;
 
@@ -237,8 +320,6 @@ int clientMenu(vector <string>& card, vector<string>& cardNumbers, vector<string
                     }
                     else{
                     
-
-
                    // Dispense the money
                         billCount[1] -= bills1000; // minus 1000 bills
                         billCount[0] -= bills500;  // minus 500 bills
@@ -252,16 +333,20 @@ int clientMenu(vector <string>& card, vector<string>& cardNumbers, vector<string
                         cout << "Service Fee: PHP " << fee << endl;
                         cout << "Total dispensed: PHP " << totalDispensed << "\n";
 
-
-
-                        
                         deductBalance(balances[index], totalDispensed);
                         deductBalance(balances[index], fee);
 
-
+                        transactionTypes.push_back("Withdraw");
+                        transactionAmounts.push_back(amount);
+                        transactionFees.push_back(fee);
+                        transactionQuantities.push_back(1);
+                        owner.push_back(index);
+                        time.push_back(getTime()); 
 
                         cout << "Press any key to continue: "; 
                         cin >> contin;
+                        clearScreen();
+
                     }
                 }      
                 
@@ -322,11 +407,20 @@ int clientMenu(vector <string>& card, vector<string>& cardNumbers, vector<string
                 // Deduct transfer amount 
                 deductBalance(balances[index], transferAmount);
 
-                // 3Deduct fee
+                // Deduct fee
                 deductBalance(balances[index], fee);
 
                 // Add money to recipient
                 balances[receptantIndex] += transferAmount;
+
+
+                transactionTypes.push_back("Tranfer");
+                transactionAmounts.push_back(transferAmount);
+                transactionFees.push_back(fee);
+                transactionQuantities.push_back(1);
+                owner.push_back(index);
+                time.push_back(getTime()); 
+
 
                 cout << "=============================== \n";
                 cout << "\nTransfer Successful!\n";
@@ -336,10 +430,52 @@ int clientMenu(vector <string>& card, vector<string>& cardNumbers, vector<string
                 cout << "=============================== \n";
                 cout << "Press any key to continue: "; 
                 cin >> contin;
+                clearScreen();
 
             }
-                
-        }while(choice != 5);
+            else if(choice == 4){
+                transactionHistory(transactionTypes, transactionAmounts, transactionFees, transactionQuantities, time, owner, index, bankNames, accountTypes);
+            }
+            else if(choice == 5){
+                clearScreen();
+                string current;
+                string newPin;
+                string input;
+
+                cout << "\n=========== CHANGE PIN ==========\n";
+                cout << "Date & Time: " << getTime() << "\n";
+                cout << "  Bank: " << bankNames[index] << "      Type: " << accountTypes[index] << endl;
+
+                cout << "----------------------------------------\n";
+
+                cout << "Enter Current Pin: ";
+                cin >> current;
+
+                if(current != encodedPINs[index]){
+                    cout << "Incorrect Pin \n";
+                    cout << "Press any key to continue \n";
+                    cin >> current;
+                    continue;
+                }
+                else{
+                    cout << "Enter New Pin: ";
+                    cin >> newPin;
+
+                    if(newPin.size() != 6){
+                        cout << "New pin must contain 6 numbers. \n";
+                        cout << "Press any key to continue \n";
+                        cin >> input;
+                        continue;
+                    }
+
+                    encodedPINs[index] = newPin;
+                    cout << "Successfully changed pin \n";
+                    cout << "Press any key to continue \n";
+                    cin >> input;
+                    continue;
+                }
+            }                
+        }while(choice != 6);
     }  
 };
 
@@ -382,10 +518,24 @@ int main(){
     vector<string> accountTypes = {"Local", "Local"};    
     // "Local" or "International"
 
+    // For each account's transaction history
+    vector<string> transactionTypes;    
+
+    // "Withdrawal", "Deposit", "Transfer"
+    vector<double> transactionAmounts;
+    vector<double> transactionFees;
+    vector<int> transactionQuantities;
+    vector <string> time;
+
+    vector <int> owner;
+
+
+
     while(true) {
         int role = login();
         if(role == 1) {
-            clientMenu(card, cardNumbers, encodedPINs, balances, userBanks, billCount, localFees, bankNames, accountTypes, intlFees, dailyLimits);
+            clientMenu(card, cardNumbers, encodedPINs, balances, userBanks, billCount, localFees, bankNames, accountTypes, 
+                intlFees, dailyLimits, transactionTypes, transactionAmounts,  transactionFees, transactionQuantities, time, owner);
         } 
         else if(role == 0) {
             cout << "Exiting ATM...\n";
